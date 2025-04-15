@@ -1,24 +1,16 @@
-#!/bin/sh
-#
-# Use this script to run your program LOCALLY.
-#
-# Note: Changing this script WILL NOT affect how CodeCrafters runs your program.
-#
-# Learn more: https://codecrafters.io/program-interface
+#!/bin/bash
 
-set -e # Exit early if any commands fail
+# Exit immediately if a command exits with a non-zero status
+set -e
 
-# Copied from .codecrafters/compile.sh
-#
-# - Edit this to change how your program compiles locally
-# - Edit .codecrafters/compile.sh to change how your program compiles remotely
-(
-  cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
-  go build -o /tmp/codecrafters-build-redis-go app/*.go
-)
+# Define app directory and binary name
+APP_DIR="./app"
+BINARY_NAME="app_binary"
 
-# Copied from .codecrafters/run.sh
-#
-# - Edit this to change how your program runs locally
-# - Edit .codecrafters/run.sh to change how your program runs remotely
-exec /tmp/codecrafters-build-redis-go "$@"
+# Build the Go app
+echo "Building Go application..."
+go build -o "$BINARY_NAME" "$APP_DIR"
+
+# Run the binary with arguments passed to the script
+echo "Running application with arguments: $@"
+./"$BINARY_NAME" "$@"

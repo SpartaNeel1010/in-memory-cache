@@ -1,33 +1,28 @@
-[![progress-banner](https://backend.codecrafters.io/progress/redis/e2e8c850-2fe7-41d6-91c9-245e6b5872c1)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+In Memory Cache
+===
 
-This is a starting point for Go solutions to the
-["Build Your Own Redis" Challenge](https://codecrafters.io/challenges/redis).
+What is InMemoryCache?
 
-In this challenge, you'll build a toy Redis clone that's capable of handling
-basic commands like `PING`, `SET` and `GET`. Along the way we'll learn about
-event loops, the Redis protocol and more.
+InMemoryCache is a lightweight, high-performance in-memory key-value store built in Go, designed as a minimalist Redis alternative. It supports core commands like GET, SET, and EXPIRE, and enables real-time data flow with Redis Streams and a basic pub/sub system. The datastore features RDB-style persistence using compact binary serialization for reliable point-in-time snapshots. Additionally, it implements master-slave replication with offset-based synchronization and command propagation, making it a solid foundation for exploring distributed caching and reactive data systems.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+===
+Here’s your customized version in the same style, adapted for InMemoryCache:
 
-# Passing the first stage
+⸻
 
-The entry point for your Redis implementation is in `app/server.go`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+Getting Started with InMemoryCache
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
+The easiest way to get started with InMemoryCache is by cloning the repository and running the executable script with the desired configuration:
 
-That's all!
+$ git clone https://github.com/your-username/in-memory-cache.git
+$ cd in-memory-cache
+$ ./execute.sh --port 6379
 
-# Stage 2 & beyond
+The above command will start the InMemoryCache server locally on port 6379.
 
-Note: This section is for stages 2 and beyond.
+You can interact with it using the standard Redis CLI or any Redis-compatible client:
 
-1. Ensure you have `go (1.19)` installed locally
-1. Run `./your_program.sh` to run your Redis server, which is implemented in
-   `app/server.go`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+$ redis-cli -p 6379
+
+
+

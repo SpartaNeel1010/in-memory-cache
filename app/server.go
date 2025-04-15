@@ -14,7 +14,10 @@ var dir = flag.String("dir", "/tmp/redis-data", "Directory to store RDB file")
 var dbFileName = flag.String("dbfilename", "dump.rdb", "RDB file name")
 var replicaOf = flag.String("replicaof", "nil", "Is this server a replica? If yes then what is host Id and port number")
 
+var emptyRDBHex = "524544495330303131fa0972656469732d76657205372e322e30fa0a72656469732d62697473c040fa056374696d65c26d08bc65fa08757365642d6d656dc2b0c41000fa08616f662d62617365c000fff06e3bfec0ff5aa2"
 
+
+var replicaConnections []net.Conn
 
 var _ = net.Listen
 
@@ -26,13 +29,19 @@ var fullPath string;
 var role string="master"
 var master_repl_offset int =0
 var master_replid string ="8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+var masterConn net.Conn
+var isConnectedToMaster bool = false
 
+// type RedisValue struct {
+// 	Value interface{}
+// 	Type  string
+// }
 
+// var redisDB map[string]RedisValue = make(map[string]RedisValue)
 
 var(
  DB map[string]string = make(map[string]string)
  expTime map[string]int = make(map[string]int)
- 
 )
 func createPath() {
 	// Check if file exists
@@ -75,7 +84,6 @@ func main() {
 
 	if(*replicaOf != "nil"){
 		role="slave"
-		connectToMaster()
 	}
 
 	createPath()
@@ -92,9 +100,16 @@ func main() {
 	logger.Info("creating server", "port", *port, "host", host)
 	defer l.Close()
 
+	    // If this is a replica, start a background goroutine to manage master connection
+
+
 	
 
+	if role == "slave" {
+		go connectAndHandleMaster()
+	}
 
+	
 
 	for {
 		conn, err := l.Accept()
@@ -103,6 +118,8 @@ func main() {
 			logger.Error("Error accepting connection", "error", err.Error())
 			os.Exit(1)
 		}
+		
+         
 		go handleConnection(conn)
 	}
 	

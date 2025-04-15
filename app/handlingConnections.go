@@ -6,15 +6,19 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"encoding/hex"
 	"os"
 
 )
+// var offset int =0
+
 func handleConnection(conn net.Conn) {
+	fmt.Println("Process on " +*port + " :Handling connection from", conn.RemoteAddr().String())
 
 	defer conn.Close()
-	logger.Info("Client connected", "address", conn.RemoteAddr().String())
 
-	// reader := bufio.NewReader(conn)
+ 
+
 
 	for {
 		// Read the command from the client
@@ -42,7 +46,7 @@ func handleConnection(conn net.Conn) {
 		}
 
 		// Print parsed result (should be ["ECHO", "hey"])
-		fmt.Println(parsed[0])
+
 		// logger.Info("Parsed result", "message", parsed)
 
 		// Respond to the ECHO command (this is for example purposes)
@@ -59,6 +63,10 @@ func handleConnection(conn net.Conn) {
 				conn.Write([]byte("-ERR unknown command\r\n"))
 				continue
 			}
+			fmt.Println(msg)
+		
+			go sendMessageToReplicas(msg)
+			// go temp()
 			key:=parsed[1]
 			value:=parsed[2]
 			if len(parsed)==5 && parsed[3]=="px" {
@@ -74,6 +82,7 @@ func handleConnection(conn net.Conn) {
 			} 
 			
 			DB[key]=value
+			fmt.Println("Master: Setting key:", key, "to value:", value)
 			conn.Write([]byte("+OK\r\n"))
 
 		}else if command=="get"{
@@ -166,6 +175,7 @@ func handleConnection(conn net.Conn) {
 			}
 			
 		} else if command == "replconf"{
+			
 			if role != "master"{
 				conn.Write([]byte("-ERR unknown command\r\n"))
 				continue
@@ -177,6 +187,11 @@ func handleConnection(conn net.Conn) {
 				conn.Write([]byte("-ERR unknown command\r\n"))
 				continue
 			}
+
+			replicaConnections = append(replicaConnections, conn)
+            // pysnc replID offset
+			// Initially replID is "?" and offset is -1
+			// replID is the id of the master node and offset is the offset of the master node
 			reqReplID := strings.ToLower(parsed[1])
 			slaveOffset := strings.ToLower(parsed[2])
 			if reqReplID=="?" && slaveOffset=="-1"{
@@ -186,12 +201,53 @@ func handleConnection(conn net.Conn) {
 				// However, this is the first time master knows about the replica thus it will send whole rdb file and will start full resynchronization 
 				//  Also, I don't know If I have to recieve some kind of reply from the slave node 
 				// I don't know how I can read the rdb file and decode it and store it in resp format 
+				// I will just write the file in the same directory as the master node and then send it to the slave node
+
+				buf, _ := hex.DecodeString(emptyRDBHex)
+		
+		 		conn.Write([]byte("$" + strconv.Itoa(len(buf)) + "\r\n" + string(buf)))
+
+
 
 				continue
 			}
 			conn.Write([]byte("-ERR unknown command\r\n"))
 
-		}else {
+		}else if command == "wait" {
+			if role != "master" || len(parsed)<3{
+				conn.Write([]byte("-ERR unknown command\r\n"))
+				continue
+			}
+			// write in connection the length of replicaConnections array
+			length := len(replicaConnections)
+			conn.Write([]byte(":" + strconv.Itoa(length) + "\r\n"))
+
+
+			// conn.Write([]byte(":\r\n"))
+			// wait for the given number of replicas to acknowledge the given offs
+
+		}else if command == "type"{
+			if len(parsed)<2{
+				conn.Write([]byte("-ERR unknown command\r\n"))
+				continue
+			}
+			key := parsed[1]
+			_, exists := DB[key]
+			if !exists{
+				conn.Write([]byte("+none\r\n"))
+				continue
+			}
+			// fmt.Println("In the type command")
+			currentTime := time.Now().UnixMilli()
+			expTm,exist:=expTime[key]
+			if exist && (currentTime > (int64(expTm))) {
+				delete(expTime,key)
+				delete(DB, key)
+				conn.Write([]byte("+none\r\n"))
+				continue
+			}
+			conn.Write([]byte("+string\r\n"))
+		} else {
 			conn.Write([]byte("-ERR unknown command\r\n"))
 		}
 	}
