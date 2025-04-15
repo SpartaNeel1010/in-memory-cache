@@ -16,7 +16,7 @@ InMemoryCache is a lightweight, high-performance in-memory key-value store built
 The easiest way to get started with InMemoryCache is by cloning the repository and running the executable script with the desired configuration:
 
 ```bash
-$ git clone https://github.com/your-username/in-memory-cache.git
+$ git clone https://github.com/SpartaNeel1010/in-memory-cache
 $ cd in-memory-cache
 $ ./execute.sh --port 6379
 ```
@@ -56,19 +56,10 @@ InMemoryCache implements a subset of the Redis command set:
 - `EXISTS key [key ...]` - Check if keys exist
 - `EXPIRE key seconds` - Set a key's time to live in seconds
 
-### Pub/Sub
-- `PUBLISH channel message` - Post a message to a channel
-- `SUBSCRIBE channel [channel ...]` - Listen for messages on specified channels
-- `UNSUBSCRIBE [channel [channel ...]]` - Stop listening for messages
 
 ### Streams
 - `XADD key ID field value [field value ...]` - Append a new entry to a stream
 - `XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key ...] ID [ID ...]` - Read data from streams
-
-### Administration
-- `INFO [section]` - Get information and statistics about the server
-- `SAVE` - Synchronously save the dataset to disk
-- `SLAVEOF host port` - Make server a replica of another instance
 
 ## Performance
 
@@ -92,7 +83,7 @@ InMemoryCache is designed for high performance with minimal resource consumption
 To build InMemoryCache from source:
 
 ```bash
-$ git clone https://github.com/your-username/in-memory-cache.git
+$ git clone https://github.com/SpartaNeel1010/in-memory-cache
 $ cd in-memory-cache
 $ go build -o inmemorycache cmd/main.go
 ```
